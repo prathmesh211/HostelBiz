@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "876620071943",
+    "project_id": "hostelbiz-411c4",
+    "storage_bucket": "hostelbiz-411c4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:876620071943:android:a9159ce6315648a77c96a2",
+        "android_client_info": {
+          "package_name": "com.example.hostelbiz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "876620071943-d5777ecp26s4re6ddg21lp701e1a0p0j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnmeLT6Z2E_2EwuKVC2x_y4GfIwKqa-wQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "876620071943-d5777ecp26s4re6ddg21lp701e1a0p0j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
