@@ -4,11 +4,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import androidx.fragment.app.Fragment;
+
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -16,7 +22,9 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-public class AuthenticationActivity extends AppCompatActivity {
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+
+public class AuthenticationActivity extends FragmentActivity {
     private EditText nameEditText;
     private EditText mobileNumberEditText;
     private EditText addressEditText;
@@ -26,6 +34,7 @@ public class AuthenticationActivity extends AppCompatActivity {
     private TextView textView;
 
     private FirebaseAuth firebaseAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +49,27 @@ public class AuthenticationActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.button_login);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        textView = findViewById(R.id.skipTv);
+        textView = findViewById(R.id.loginTv);
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(i);
+                LoginFragment mainFragment = new LoginFragment();
+
+                // Get the FragmentManager and start a FragmentTransaction
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                // Replace the current fragment container with the new MainFragment
+            //    fragmentTransaction.replace(R.id.fragmentContainer, mainFragment);
+
+                // Add the transaction to the back stack (optional)
+                fragmentTransaction.addToBackStack(null);
+
+                // Commit the transaction
+                fragmentTransaction.commit();
             }
         });
+
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
