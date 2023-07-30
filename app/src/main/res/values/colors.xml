@@ -10,4 +10,7 @@
     <color name="primary1">#0F2027</color>
     <color name="primary2">#203A43</color>
     <color name="primary3">#2C5364</color>
+    <color name="grey">#E9EAEE</color>
+    <color name="goodgrey">#535353</color>
+    <color name="lightgrey">#EEEEEE</color>
 </resources>

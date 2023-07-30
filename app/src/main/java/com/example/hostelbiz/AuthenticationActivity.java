@@ -4,9 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,12 +20,18 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 public class AuthenticationActivity extends FragmentActivity {
@@ -33,6 +43,8 @@ public class AuthenticationActivity extends FragmentActivity {
     private Button loginButton;
     private TextView textView;
 
+    private RadioGroup radioGroup;
+    private RadioButton selectedRadioButton;
     private FirebaseAuth firebaseAuth;
 
 
@@ -47,9 +59,10 @@ public class AuthenticationActivity extends FragmentActivity {
         passwordEditText = findViewById(R.id.edit_text_password);
         confirmPasswordEditText = findViewById(R.id.edit_text_confirm_password);
         loginButton = findViewById(R.id.button_login);
-
+        radioGroup = findViewById(R.id.radio_group_user_type);
         firebaseAuth = FirebaseAuth.getInstance();
         textView = findViewById(R.id.loginTv);
+        selectedRadioButton = findViewById(radioGroup.getChildAt(0).getId());
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +87,7 @@ public class AuthenticationActivity extends FragmentActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String name = nameEditText.getText().toString().trim();
                 String mobileNumber = mobileNumberEditText.getText().toString().trim();
                 String address = addressEditText.getText().toString().trim();
@@ -99,6 +113,55 @@ public class AuthenticationActivity extends FragmentActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                        Map<String, Object> info = new HashMap<>();
+                        info.put("name", name);
+                        info.put("mobile", mobileNumber);
+                        info.put("address", address);
+                        info.put("password", password);
+
+                        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                                if(radioGroup.getCheckedRadioButtonId() == RadioGroup.NO_ID){
+                                    Toast.makeText(AuthenticationActivity.this, "Please select whether you're Student or Staff.", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    int selectedId = radioGroup.getCheckedRadioButtonId();
+                                    selectedRadioButton = (RadioButton) findViewById(selectedId);
+                                }
+
+                            }
+                        });
+
+                        if(selectedRadioButton.getText().toString().equals("Student")){
+
+                            db.collection("students").document(user.getUid()).set(info)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+
+                                            } else {
+                                                Toast.makeText(AuthenticationActivity.this, task.getException().getMessage() , Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+
+                        } else {
+                            db.collection("staff").document(user.getUid()).set(info)
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()){
+
+                                            } else {
+                                                Toast.makeText(AuthenticationActivity.this, task.getException().getMessage() , Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                        }
+
+
                         if (user != null) {
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(name)
@@ -107,8 +170,9 @@ public class AuthenticationActivity extends FragmentActivity {
                             user.updateProfile(profileUpdates)
                                     .addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
-                                            Toast.makeText(AuthenticationActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(AuthenticationActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                                             navigateToMainActivity(user);
+
                                         }
                                     });
                         }
@@ -135,7 +199,7 @@ public class AuthenticationActivity extends FragmentActivity {
      //       Intent staffIntent = new Intent(AuthenticationActivity.this, MainActivityStaff.class);
      //       startActivity(staffIntent);
      //   }
-        ;
+
     }
 
     private String getUserType(FirebaseUser user) {
