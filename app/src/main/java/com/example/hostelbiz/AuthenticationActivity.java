@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.hostelbiz.ui.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -112,13 +115,9 @@ public class AuthenticationActivity extends FragmentActivity {
         firebaseAuth.createUserWithEmailAndPassword(mobileNumber + "@example.com", password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        User user = new User(name, mobileNumber, address);
+                        FirebaseUser fuser = firebaseAuth.getCurrentUser();
                         FirebaseFirestore db = FirebaseFirestore.getInstance();
-                        Map<String, Object> info = new HashMap<>();
-                        info.put("name", name);
-                        info.put("mobile", mobileNumber);
-                        info.put("address", address);
-                        info.put("password", password);
 
                         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                             @Override
@@ -135,7 +134,7 @@ public class AuthenticationActivity extends FragmentActivity {
 
                         if(selectedRadioButton.getText().toString().equals("Student")){
 
-                            db.collection("students").document(user.getUid()).set(info)
+                            db.collection("students").document(fuser.getUid()).set(user)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -148,7 +147,7 @@ public class AuthenticationActivity extends FragmentActivity {
                                     });
 
                         } else {
-                            db.collection("staff").document(user.getUid()).set(info)
+                            db.collection("staff").document(fuser.getUid()).set(user)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
@@ -162,16 +161,16 @@ public class AuthenticationActivity extends FragmentActivity {
                         }
 
 
-                        if (user != null) {
+                        if (fuser != null) {
                             UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                     .setDisplayName(name)
                                     .build();
 
-                            user.updateProfile(profileUpdates)
+                            fuser.updateProfile(profileUpdates)
                                     .addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
                                             Toast.makeText(AuthenticationActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                                            navigateToMainActivity(user);
+                                            navigateToMainActivity(fuser);
 
                                         }
                                     });
@@ -191,27 +190,14 @@ public class AuthenticationActivity extends FragmentActivity {
     }
 
     private void navigateToMainActivity(FirebaseUser user) {
-        String userType = getUserType(user);
-       // if (userType.equals("student")) {
+
+        if(selectedRadioButton.getText().toString().equals("Student")){
             Intent studentIntent = new Intent(AuthenticationActivity.this, MainActivity.class);
             startActivity(studentIntent);
-     //   } else if (userType.equals("staff")) {
-     //       Intent staffIntent = new Intent(AuthenticationActivity.this, MainActivityStaff.class);
-     //       startActivity(staffIntent);
-     //   }
-
-    }
-
-    private String getUserType(FirebaseUser user) {
-        // You can implement your own logic to determine the user type based on user data or Firebase user properties.
-        // For example, you could use custom user claims, a separate "users" collection in Firestore, or a specific naming convention in user email addresses.
-        // Here, we are assuming that the user type is determined based on the email address.
-        String email = user.getEmail();
-        if (email != null && email.endsWith("@student.example.com")) {
-            return "student";
-        } else if (email != null && email.endsWith("@staff.example.com")) {
-            return "staff";
+        } else {
+            startActivity((new Intent(AuthenticationActivity.this, MainActivityStaff.class)));
         }
-        return "";
     }
+
+
 }

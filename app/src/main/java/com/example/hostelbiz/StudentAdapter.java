@@ -1,5 +1,6 @@
 package com.example.hostelbiz;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,13 +9,18 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.hostelbiz.ui.User;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHolder> {
-    private List<String> studentNames;
+    private ArrayList<User> studentNames;
+    private Context context;
 
-    public StudentAdapter(List<String> studentNames) {
+    public StudentAdapter(Context context, ArrayList<User> studentNames) {
         this.studentNames = studentNames;
+        this.context = context;
     }
 
     @NonNull
@@ -26,8 +32,10 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String name = studentNames.get(position);
-        holder.nameTextView.setText(name);
+        User user = studentNames.get(position);
+        holder.name.setText(user.getName());
+        holder.mobile.setText(user.getMobile());
+        holder.address.setText(user.getAddress());
     }
 
     @Override
@@ -36,11 +44,13 @@ public class StudentAdapter extends RecyclerView.Adapter<StudentAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView;
+        TextView name, mobile, address;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            nameTextView = itemView.findViewById(R.id.text_view_student_name);
+            name = itemView.findViewById(R.id.nameTv);
+            mobile = itemView.findViewById(R.id.mobileTv);
+            address = itemView.findViewById(R.id.addressTv);
         }
     }
 }
